@@ -55,7 +55,7 @@ for i in tqdm(range(0, nn, 1), desc="Measureing"):
     position_data[i] = stage.get_position(scale = True)
     oscp_data[i] = OSCP.return_meanV()
     
-    print(str(OSCP.return_meanV()) + " at " + str(stage.get_position(scale = False)))
+    # print(str(OSCP.return_meanV()) + " at " + str(stage.get_position(scale = False)))
     
     # print(position_data[i])
     # print(stage.get_position(scale = False))
