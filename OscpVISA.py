@@ -5,7 +5,8 @@ rm = visa.ResourceManager()
 
 # print(rm.list_resources())
 
-class SiglentOSCP:
+
+class oscilloscope:
         
     def __init__(self, name):
         self.name = name

@@ -138,10 +138,10 @@ class interferometer:
             self.center_to_max(position_range=position_range/2)
         return self.stage.get_position()
 
-    def measure_IvP(self, initial_position, final_position, increment,
-                    scale, laser_bw, laser_wl, save_data=True):
+    def measure_IvP(self, initial_position=None, final_position=None, increment=None,
+                    scale=None, laser_bw=None, laser_wl=None, save_data=True):
         """
-        Takes a measurement and plots IvD data, exports a .csv file if save_data=True
+        Takes a measurement and plots IvD data, exports a .cs v file if save_data=True
 
         :param initial_position: position to start measuring
         :param final_position: position to stop measuring
@@ -151,15 +151,14 @@ class interferometer:
         :param laser_bw: record laser bandwidth of this measurement
         :param laser_wl: record laser wavelength of this measurement
         """
+        if initial_position==None: initial_position = self.initial_position
+        if final_position == None: final_position = self.final_position
+        if increment == None: increment = self.increment
+        if scale == None: scale = self.scale
+        if laser_bw == None: laser_bw = self.laser_bw
+        if laser_wl == None: laser_wl = self.laser_wl
 
         #%% Set parameters and record values
-        self.stage.stop()
-        self.initial_position = initial_position
-        self.final_position = final_position
-        self.increment = increment
-        self.scale = scale
-        self.laser_bw = laser_bw
-        self.laser_wl = laser_wl
 
         # instantiate data array
         array_size = (self.initial_position - self.final_position) / self.increment
@@ -194,18 +193,31 @@ class interferometer:
 
         #%% export .csv
         if save_data:
-            dataframe = pandas.DataFrame(
-                data=data_IvP,
-                columns=['pos', 'scaled_pos', 'time', 'intensity']
-            )
-            laser_info = str(laser_wl) + "|" + str(laser_bw)
-            now = datetime.now()
-
-            date_string = now.strftime("%d-%m-%YT%H%M%S")
-
-            dataframe.to_csv(self.data_dir + date_string
-                             + laser_info + ".csv")
+            self.export_csv(data_IvP)
         return data_IvP
+
+    def export_csv(self, data, name=None):
+        """ A method that exports the current data to a .csv file
+
+        :param data: data to be exported, should be numpy array
+        :param name: filename
+        :return: exports .cvs
+        """
+        dataframe = pandas.DataFrame(
+            data=data,
+            columns=['pos', 'scaled_pos', 'time', 'intensity']
+        )
+        laser_info = str(self.laser_wl) + "|" + str(self.laser_bw)
+
+        if name==None:
+            now = datetime.now()
+            date_string = now.strftime("%d-%m-%YT%H%M%S")
+            filename = self.data_dir + date_string + laser_info
+        else:
+            filename = self.data_dir + name + laser_info
+
+        dataframe.to_csv(filename + ".csv")
+
 
     def move_by(self, x, scale=None):
         if scale==None: scale = self.scale

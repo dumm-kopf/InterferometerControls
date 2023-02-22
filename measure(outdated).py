@@ -16,14 +16,14 @@ from pylablib.devices import Thorlabs
 
 #%% Initialize Devices
 # Initialize oscilloscope
-OSCP = OscpVISA.SiglentOSCP(name = 'USB0::0xF4ED::0xEE3A::SDS1ECDQ2R5643::INSTR')
+OSCP = OscpVISA.oscilloscope(name='USB0::0xF4ED::0xEE3A::SDS1ECDQ2R5643::INSTR')
 # OSCP.ID()
 
 # Initialize Kinesis Motor as stage w/ scale
 stage_scale = 233472/0.5 
 
 try: 
-    stage = Thorlabs.KinesisMotor('80840262', scale = stage_scale) 
+    stage = Thorlabs.KinesisMotor('80840262', scale=stage_scale)
 except Thorlabs.base.ThorlabsError:
     print("Operation interrupted, stage not closed")
     print('Enter "stage.close()" in console')
@@ -35,16 +35,16 @@ except Thorlabs.base.ThorlabsError:
 
 init_x = -15000      
 final_x = 15000
-dx = 200   #displacement between each measurement
+dx = 200   # displacement between each measurement
 
 
 #%% Define measurement function
-def IVDmeasure(init, fin, dx=1, scale=False):
+def measureIVD(init, fin, increment=1, scale=False):
     
     # Initialize arrays for data
     nn = int((fin - init) / dx)
     global PvI_data
-    PvI_data= numpy.zeros((nn, 2))
+    PvI_data = numpy.zeros((nn, 2))
 
 
     
@@ -65,7 +65,7 @@ def IVDmeasure(init, fin, dx=1, scale=False):
     
         
 #%%
-IVDmeasure(init_x, final_x, dx=dx, scale=False)
+measureIVD(init_x, final_x, dx=dx, scale=False)
 
 #%%  Plot the stage.Position vs OSCP.meanV
 plt.plot(PvI_data[:,0], PvI_data[:,1])
