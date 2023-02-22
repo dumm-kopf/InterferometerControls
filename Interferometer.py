@@ -14,7 +14,7 @@ from tqdm import tqdm
 from pylablib.devices import Thorlabs
 
 
-class Interferometer:
+class interferometer:
     """Interferometer class containing operations
     that involve the oscilloscope and motor"""
 
@@ -29,14 +29,14 @@ class Interferometer:
         """
         self.laser_bw = "None"
         self.laser_wl = "None"
-        if motor_serial is '80840262':
+        if motor_serial == '80840262':
             self.stage_scale = 2.14e-6
         else:
             self.stage_scale = stage_scale
 
-        if computer is "Jason's IBM":
+        if computer == "Jason's IBM":
             self.data_dir = "C:/Users/lenovo/Documents/Beam Characterization Project/Data/PvI"
-        elif computer is "Jason's mac":
+        elif computer == "Jason's mac":
             self.data_dir = "/Users/jason/Documents/BeamCharacterizationProject"
         else:
             raise Exception("Insert correct computer name,"
@@ -44,7 +44,7 @@ class Interferometer:
 
         #%% Initialize devices
         # initialize oscilloscope
-        self.oscilloscope = OscpVISA.SiglentOSCP(name=oscilloscope_name)
+        self.oscilloscope = OscpVISA.oscilloscope(name=oscilloscope_name)
 
         # Initialize Kinesis Motor as stage w/ given scale
         try:
@@ -53,7 +53,7 @@ class Interferometer:
         # Error for if the stage wasn't closed after previous operation
         except Thorlabs.base.ThorlabsError:
             raise Exception("Operation interrupted, stage not closed \n "
-                            "Enter 'interferometer.stage.close()' in console")
+                            "Enter 'interferometer.close()' in console")
 
         #%% Instantiate variables
         # Measurement parameters
@@ -138,7 +138,7 @@ class Interferometer:
             self.center_to_max(position_range=position_range/2)
         return self.stage.get_position()
 
-    def measure_IvD(self, initial_position, final_position, increment,
+    def measure_IvP(self, initial_position, final_position, increment,
                     scale, laser_bw, laser_wl, save_data=True):
         """
         Takes a measurement and plots IvD data, exports a .csv file if save_data=True
@@ -163,7 +163,7 @@ class Interferometer:
 
         # instantiate data array
         array_size = (self.initial_position - self.final_position) / self.increment
-        data_IvP = numpy.zeros((array_size, 3))
+        data_IvP = numpy.zeros((array_size, 4))
 
         # prep for measurement
         self.stage.move_to(initial_position, scale=scale)
@@ -179,24 +179,24 @@ class Interferometer:
 
             data_IvP[i][0] = self.stage.get_position(scale=False)
             data_IvP[i][1] = self.convert(data_IvP[i][0])
-            data_IvP[i][2] = self.oscilloscope.return_meanV()
+            data_IvP[i][2] = data_IvP[i][1] * 3e-8
+            data_IvP[i][3] = self.oscilloscope.return_meanV()
 
         #%% Plot data
         plt.style.use('_mpl-gallery')
 
         fig, ax = plt.subplots()
 
-        ax.plot(data_IvP[:, 0], data_IvP[:, 1])
+        ax.plot(data_IvP[:, 1], data_IvP[:, 3])
         ax.set(xlabel='position (nm)', ylabel='intensity (V)',
                title='SHG Intensity vs. Position')
-
         plt.grid()
 
         #%% export .csv
         if save_data:
             dataframe = pandas.DataFrame(
                 data=data_IvP,
-                columns=['Position(internal)', 'Position(nm)', 'Intensity(V)']
+                columns=['pos', 'scaled_pos', 'time', 'intensity']
             )
             laser_info = str(laser_wl) + "|" + str(laser_bw)
             now = datetime.now()
@@ -206,3 +206,28 @@ class Interferometer:
             dataframe.to_csv(self.data_dir + date_string
                              + laser_info + ".csv")
         return data_IvP
+
+    def move_by(self, x, scale=None):
+        if scale==None: scale = self.scale
+        self.stage.move_by(x, scale)
+
+    def move_to(self, x, scale=None):
+        if scale==None: scale = self.scale
+        self.stage.move_to(x, scale)
+
+    def get_pos(self, scale=None):
+        if scale==None: scale = self.scale
+        self.stage.get_position(scale=scale)
+
+    def close(self): self.stage.close()
+
+    def open(self): self.stage.open()
+
+    def get_mean(self): self.oscilloscope.return_meanV()
+
+    def import_data(filepath):
+        dataF = pandas.read_csv(filepath_or_buffer=filepath, header=0)
+        dataA = pandas.DataFrame.to_numpy(dataF)
+        return dataA
+
+    # def fit_gaussian(data):
