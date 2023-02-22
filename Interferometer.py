@@ -161,7 +161,7 @@ class interferometer:
         #%% Set parameters and record values
 
         # instantiate data array
-        array_size = (self.initial_position - self.final_position) / self.increment
+        array_size = abs(int((self.initial_position - self.final_position) / self.increment))
         data_IvP = numpy.zeros((array_size, 4))
 
         # prep for measurement
@@ -229,7 +229,7 @@ class interferometer:
 
     def get_pos(self, scale=None):
         if scale==None: scale = self.scale
-        self.stage.get_position(scale=scale)
+        return self.stage.get_position(scale=scale)
 
     def close(self): self.stage.close()
 
