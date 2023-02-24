@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This is a better code for measuring and plotting
+This is an outdated code for measuring and plotting
 intensity vs. displacement of a SHG Oscilloscope
 """
 

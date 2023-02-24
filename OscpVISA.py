@@ -1,4 +1,7 @@
-# This code acts as a wrapper on top of pyvisa wrappers for a Siglent Oscilloscope
+"""
+This code acts as a wrapper on top of pyvisa wrappers
+for a Siglent Oscilloscope
+"""
 import pyvisa as visa
 
 rm = visa.ResourceManager()
@@ -28,14 +31,6 @@ class oscilloscope:
         prefix_len = len("C1:PAVA MEAN,")
         
         # extract numerical value from returned str
-        num_str = og_str[prefix_len : len(og_str) - 1]
+        num_str = og_str[prefix_len: len(og_str) - 1]
         
         return float(num_str)
-        
-
-        
-        
-        
-        
-            
-             
