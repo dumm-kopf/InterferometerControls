@@ -1,2 +1,3 @@
-/archive/
-/operations.py
+archive/
+operations.py
+__pycache__
