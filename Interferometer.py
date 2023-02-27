@@ -26,11 +26,6 @@ class interferometer:
             stage_scale:
         """
         #%% Instantiate variables
-        # Measurement parameters
-        self.initial_position = self.stage.get_position       # position to start measuring
-        self.final_position = self.initial_position           # position to stop measuring
-        # default values prevent excessive movement incase position hasn't been zeroed properly
-
         # displacement between each measurement for desired precision
         self.precision = 45       # 45 internal units this is just under 100nm
 
@@ -40,8 +35,8 @@ class interferometer:
         # Maintain scale option for pylablib methods, so it doesn't have to be included in every method call
         self.scale = False
         # Relative directories for data and plots
-        self.data_dir = '/data'
-        self.plot_dir = '/plot'
+        self.data_dir = 'data/'
+        self.plot_dir = 'plot/'
         # Dictionary for data array index
         self.data_dic = {
             "pos": 0,
@@ -71,6 +66,11 @@ class interferometer:
         except Thorlabs.base.ThorlabsError:
             raise Exception("Operation interrupted, stage not closed \n "
                             "Enter 'interferometer.close()' in console")
+
+        # Measurement parameters
+        self.initial_position = self.stage.get_position  # position to start measuring
+        self.final_position = self.initial_position  # position to stop measuring
+        # default values prevent excessive movement incase position hasn't been zeroed properly
 
     def convert(self, val):
         """Converts between internal units and physical units based on given scale factor
@@ -196,14 +196,13 @@ class interferometer:
         if save_data:
             self.export_csv(data_IvP)
 
-    def plot_IvP(self, data=None, save=False):
+    def plot_IvP(self, data, save=False):
         """
         A method that plots given data
 
         :param data: 2D numpy array to be plotted
         :return: a plot
         """
-        if data==None: data = self.mc_data
 
         plt.style.use('_mpl-gallery')
         fig, ax = plt.subplots()
@@ -211,29 +210,30 @@ class interferometer:
         ax.set(xlabel='position (nm)', ylabel='intensity (V)',
                title='SHG Intensity vs. Position')
         plt.grid()
-        info_string = 'Bandwidth: ' + self.laser_bw + 'Wavelength: ' + self.laser_wl
-        plt.figtext(s=info_string)
+        info_string = 'Bandwidth: ' + str(self.laser_bw)+ 'Wavelength: ' + str(self.laser_wl)
+        plt.figtext(x=0, y=0, s=info_string)
+        plt.show()
 
         if save==True: plt.savefig('\plot\info_string')
 
 
-    def export_csv(self, data, name=None):
+    def export_csv(self, name=None):
         """ A method that exports the current data to a .csv file
 
         :param data: data to be exported, should be numpy array
         :param name: filename
         :return: exports .cvs
         """
-        if data==None: data = self.mc_data
+        data = self.mc_data
 
         dataframe = pandas.DataFrame(
             data=data,
             columns=['pos', 'scaled_pos', 'time', 'intensity']
         )
-        laser_info = "|" + str(self.laser_wl) + "," + str(self.laser_bw) + "|"
-
+        # laser_info = "|" + str(self.laser_wl) + "," + str(self.laser_bw) + "|"
+        laser_info = '40800'
         if name==None:
-            filename = data + self.date_string + laser_info
+            filename = self.data_dir + self.date_string + laser_info
         else:
             filename = self.data_dir + name + laser_info
 
