@@ -2,14 +2,16 @@
 """
 Some data analysis functions
 """
-import numpy
+import numpy as np
 import pandas
+from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
+from scipy import stats
 
 
 def import_csv(file_dir):
     """
-    reads a .csv file and returns a numpyarray
+    reads a .csv file and returns a numpy array
     :param file_dir: file directory
     :return: a numpy array
     """
@@ -19,12 +21,16 @@ def import_csv(file_dir):
 
 
 def gauss(x, H, A, x0, sigma):
-    return H + A * numpy.exp(-(x - x0) ** 2 / (2 * sigma ** 2))
+    return H + A * np.exp(-(x - x0) ** 2 / (2 * sigma ** 2))
 
 
-def fit_gauss(x_data, y_data):
-    mean = sum(x_data * y_data) / sum(y_data)
-    sigma = numpy.sqrt(sum(y_data * (x_data - mean) ** 2) / sum(y_data))
-    output = curve_fit(gauss, x_data, y_data, p0=[min(y_data), max(y_data), mean, sigma])
-    return output
+def fmhw_gauss(xdata, ydata):
 
+    plt.plot(xdata, ydata, '--r')
+    mean = sum(xdata * ydata) / sum(ydata)
+    sigma = np.sqrt(sum(ydata * (xdata - mean) ** 2) / sum(ydata))
+    popt, pcov = curve_fit(gauss, xdata, ydata, p0=[min(ydata), max(ydata), mean, sigma])
+    plt.plot(xdata, gauss(xdata, *popt), 'b', label='fit')
+    plt.show()
+
+    return 2.35482 * sigma

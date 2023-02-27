@@ -153,6 +153,7 @@ class interferometer:
         :param laser_bw: record laser bandwidth of this measurement
         :param laser_wl: record laser wavelength of this measurement
         """
+        # initial_position = self.initial_position if initial_position is None else initial_position
         if initial_position==None: initial_position = self.initial_position
         if final_position==None: final_position = self.final_position
         if increment==None: increment = self.increment
@@ -236,7 +237,7 @@ class interferometer:
         else:
             filename = self.data_dir + name + laser_info
 
-        dataframe.to_csv(filename + ".csv")
+        dataframe.to_csv(f"{filename}.csv", index=False)
 
     def move_by(self, x, scale=None):
         if scale==None: scale = self.scale
