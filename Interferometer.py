@@ -64,7 +64,7 @@ class interferometer:
             self.stage._scale_units = "nm"
         # Error for if the stage wasn't closed after previous operation
         except Thorlabs.base.ThorlabsError:
-            raise Exception("Operation interrupted, stage not closed \n "
+            raise Exception("Operation interrupted, stage not closed \n"
                             "Enter 'interferometer.close()' in console")
 
         # Measurement parameters
@@ -116,30 +116,6 @@ class interferometer:
         else:
             return self.initial_position, self.final_position, self.increment
 
-    # def center_to_max(self, position_range):
-    #     """
-    #     Locates and positions the stage for maximum SHG
-    #
-    #     This is done by taking quick and scrappy measurements that
-    #     recursively decrease in range and increase in precision
-    #
-    #     :param position_range: the position range in which max SHG occurs
-    #     :return: the position the stage has been moved to
-    #     """
-    #     increment = position_range / 20
-    #     IvD = numpy.zeros((20, 2))
-    #     while increment > self.increment:
-    #         for i in range(0, 20, 1):
-    #             self.stage.wait_move()
-    #             self.stage.move_by(increment, scale=False)
-    #             IvD[i][0] = self.stage.get_position(scale=False)
-    #             IvD[i][1] = self.oscilloscope.return_meanV()
-    #         center = IvD[numpy.argmax(a=IvD[:, 1])][1]
-    #         self.stage.move_to(center, scale=False)
-    #         self.stage.wait_move()
-    #         self.center_to_max(position_range=position_range/2)
-    #     return self.stage.get_position()
-
     def measure_IvP(self, initial_position=None, final_position=None, increment=None,
                     scale=None, laser_bw=None, laser_wl=None, save_data=False):
         """
@@ -154,17 +130,23 @@ class interferometer:
         :param laser_wl: record laser wavelength of this measurement
         """
         # initial_position = self.initial_position if initial_position is None else initial_position
-        if initial_position==None: initial_position = self.initial_position
-        if final_position==None: final_position = self.final_position
-        if increment==None: increment = self.increment
-        if scale==None: scale = self.scale
-        if laser_bw==None: laser_bw = self.laser_bw
-        if laser_wl==None: laser_wl = self.laser_wl
+        if initial_position is None:
+            initial_position = self.initial_position
+        if final_position is None:
+            final_position = self.final_position
+        if increment is None:
+            increment = self.increment
+        if scale is None:
+            scale = self.scale
+        if laser_bw is None:
+            laser_bw = self.laser_bw
+        if laser_wl is None:
+            laser_wl = self.laser_wl
 
         #%% Set parameters and record values
 
         # instantiate data array
-        array_size = abs(int((self.initial_position - self.final_position) / self.increment))
+        array_size = abs(int((initial_position - final_position) / increment))
         data_IvP = numpy.zeros((array_size, 4))
 
         # prep for measurement
@@ -186,7 +168,7 @@ class interferometer:
 
             data_IvP[i][0] = self.stage.get_position(scale=False)
             data_IvP[i][1] = self.convert(data_IvP[i][0])
-            data_IvP[i][2] = data_IvP[i][1] * 3e-8
+            data_IvP[i][2] = data_IvP[i][1] * 10**9 * 3**-8
             data_IvP[i][3] = self.oscilloscope.return_meanV()
         self.mc_data = data_IvP
         #%% Plot data
@@ -201,9 +183,8 @@ class interferometer:
         A method that plots given data
 
         :param data: 2D numpy array to be plotted
-        :return: a plot
+        :param save: boolean for export plot
         """
-
         plt.style.use('_mpl-gallery')
         fig, ax = plt.subplots()
         ax.plot(data[:, 1], data[:, 3])
@@ -214,10 +195,10 @@ class interferometer:
         plt.figtext(x=0, y=0, s=info_string)
         plt.show()
 
-        if save==True: plt.savefig('\plot\info_string')
+        if save is True:
+            plt.savefig('plot/info_string')
 
-
-    def export_csv(self, name=None):
+    def export_csv(self, data, name=None):
         """ A method that exports the current data to a .csv file
 
         :param data: data to be exported, should be numpy array
@@ -230,9 +211,8 @@ class interferometer:
             data=data,
             columns=['pos', 'scaled_pos', 'time', 'intensity']
         )
-        # laser_info = "|" + str(self.laser_wl) + "," + str(self.laser_bw) + "|"
-        laser_info = '40800'
-        if name==None:
+        laser_info = "[" + str(self.laser_wl) + "," + str(self.laser_bw) + "]"
+        if name is None:
             filename = self.data_dir + self.date_string + laser_info
         else:
             filename = self.data_dir + name + laser_info
@@ -240,15 +220,15 @@ class interferometer:
         dataframe.to_csv(f"{filename}.csv", index=False)
 
     def move_by(self, x, scale=None):
-        if scale==None: scale = self.scale
+        if scale is None: scale = self.scale
         self.stage.move_by(x, scale)
 
     def move_to(self, x, scale=None):
-        if scale==None: scale = self.scale
+        if scale is None: scale = self.scale
         self.stage.move_to(x, scale)
 
     def get_pos(self, scale=None):
-        if scale==None: scale = self.scale
+        if scale is None: scale = self.scale
         return self.stage.get_position(scale=scale)
 
     def close(self): self.stage.close()
