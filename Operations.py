@@ -8,6 +8,8 @@ import Interferometer
 from matplotlib import pyplot as plt
 import numpy as np
 import scipy
+
+import datatools
 from Interferometer import interferometer
 import datatools as dt
 
@@ -21,10 +23,28 @@ import datatools as dt
 
 
 data = dt.import_csv('/Users/jason/Documents/BeamCharacterizationProject/Repo/data/27-02-2023T15475640800.csv')
-t = (data[:, 1]) * 10 ** 9 / (3 * 10 ** 8) * 2 * (800 * 10 ** -9)
-i = data[:, 3] * 1
+intensity = data[:, 3]
 
-FWHM = dt.fmhw_gauss(t, i)
-print(FWHM)
+delt_t = 2 * data[:,1] * 10 ** 12 / (3 * 10 ** 8)  # converted to femtoseconds
+intensity = data[:, 3]
 
-# expected value, 35 fs
+plt.plot(delt_t, intensity)
+plt.show()
+
+fitted = dt.fit_gauss(delt_t, intensity)
+
+plt.plot(delt_t, fitted)
+plt.show()
+
+pulse = dt.fwhm(delt_t, fitted)
+
+x = int(pulse[0])
+x2 = int(pulse[1])
+
+width = 1.41 * (delt_t[x2] - delt_t[x])
+
+# FWHM = datatools.fmhw(intensity)
+
+# expected value, 35 fs * 1.5 = 53.5 fs
+
+

@@ -168,7 +168,7 @@ class interferometer:
 
             data_IvP[i][0] = self.stage.get_position(scale=False)
             data_IvP[i][1] = self.convert(data_IvP[i][0])
-            data_IvP[i][2] = data_IvP[i][1] * 10**9 * 3**-8
+            data_IvP[i][2] = data_IvP[i][0] / 3**-8
             data_IvP[i][3] = self.oscilloscope.return_meanV()
         self.mc_data = data_IvP
         #%% Plot data
