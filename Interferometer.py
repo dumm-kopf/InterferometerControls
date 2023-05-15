@@ -140,8 +140,12 @@ class interferometer:
             scale = self.scale
         if laser_bw is None:
             laser_bw = self.laser_bw
+        else:
+            self.laser_bw = laser_bw
         if laser_wl is None:
             laser_wl = self.laser_wl
+        else:
+            self.laser_wl = laser_wl
 
         #%% Set parameters and record values
 
@@ -198,7 +202,7 @@ class interferometer:
         if save is True:
             plt.savefig('plot/info_string')
 
-    def export_csv(self, data, name=None):
+    def export_csv(self, data=None, name=None):
         """ A method that exports the current data to a .csv file
 
         :param data: data to be exported, should be numpy array
